@@ -3,74 +3,103 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TP 計算器</title>
+    <title>TP 工具（穩定最終版）</title>
     <style>
-        .label-banker { color: red; font-weight: bold; }
-        .label-player { color: blue; font-weight: bold; }
-        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f2f2f2; }
-        h2 { text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        td, th { padding: 10px; text-align: center; }
-        input { width: 60px; padding: 5px; font-size: 1em; text-align: center; }
-        .btn { padding: 10px 20px; margin: 10px; font-size: 1em; }
-        .result { font-weight: bold; }
-    
-        .hv_col, .ag_col { display: none; }
-    
+        body { font-family: Arial; padding: 20px; }
+        table { border-collapse: collapse; margin-bottom: 20px; }
+        td, th {
+            width: 50px;
+            height: 40px;
+            border: 1px solid #000;
+            text-align: center;
+            font-size: 18px;
+        }
+        input {
+            width: 48px;
+            height: 38px;
+            font-size: 18px;
+            text-align: center;
+            border: none;
+        }
+        .label-banker { background-color: #fdd; color: red; font-weight: bold; }
+        .label-player { background-color: #ddf; color: blue; font-weight: bold; }
+        .result-box { font-size: 20px; margin-top: 10px; }
+        .red-btn, .green-btn {
+            font-size: 18px; padding: 10px 20px; margin: 10px;
+            border: 2px solid #000; border-radius: 5px; font-weight: bold;
+        }
+        .red-btn { background-color: red; color: white; }
+        .green-btn { background-color: limegreen; color: black; }
+    </style>
 </head>
 <body>
-    <h2>TP 計算器</h2>
-    <table border="1">
+    <h2>TP 工具（依圖片表格）</h2>
+    <table>
         <tr>
-            <th class="label-banker">上局莊</th><th><input type="number" id="up_b_1"></th><th><input type="number" id="up_b_2"></th><th><input type="number" id="up_b_3"></th>
+            <th class="label-player">閒上局</th>
+            <th colspan="3"></th>
+            <th class="label-banker">莊上局</th>
+            <th colspan="3"></th>
         </tr>
         <tr>
-            <th class="label-banker">本局莊</th><th><input type="number" id="cur_b_1"></th><th><input type="number" id="cur_b_2"></th><th><input type="number" id="cur_b_3"></th>
+            <td></td>
+            <td><input id="up_p_1" type="text"></td>
+            <td><input id="up_p_2" type="text"></td>
+            <td><input id="up_p_3" type="text"></td>
+            <td></td>
+            <td><input id="up_b_1" type="text"></td>
+            <td><input id="up_b_2" type="text"></td>
+            <td><input id="up_b_3" type="text"></td>
         </tr>
         <tr>
-            <th class="label-player">上局閒</th><th><input type="number" id="up_p_1"></th><th><input type="number" id="up_p_2"></th><th><input type="number" id="up_p_3"></th>
+            <th class="label-player">閒本局</th>
+            <th colspan="3"></th>
+            <th class="label-banker">莊本局</th>
+            <th colspan="3"></th>
         </tr>
         <tr>
-            <th class="label-player">本局閒</th><th><input type="number" id="cur_p_1"></th><th><input type="number" id="cur_p_2"></th><th><input type="number" id="cur_p_3"></th>
+            <td></td>
+            <td><input id="cur_p_1" type="text"></td>
+            <td><input id="cur_p_2" type="text"></td>
+            <td><input id="cur_p_3" type="text"></td>
+            <td></td>
+            <td><input id="cur_b_1" type="text"></td>
+            <td><input id="cur_b_2" type="text"></td>
+            <td><input id="cur_b_3" type="text"></td>
         </tr>
     </table>
 
-    <div style="text-align:center;">
-        <button class="btn" onclick="transfer()">轉上局</button>
-        <button class="btn" onclick="clearCurrent()">清空本局</button>
+    <div class="result-box">
+        <span class="label-player">閒 TP：</span> <span id="tp_p">-</span>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span class="label-banker">莊 TP：</span> <span id="tp_b">-</span>
     </div>
 
-    
-    <button class="btn" onclick="toggleDetails()">顯示/隱藏 HV 與 AG</button>
-    <table border="1" id="resultTable">
-        <tr>
-            <th></th><th class="hv_col">HV</th><th class="ag_col">AG</th><th>TP</th>
-        </tr>
-        <tr>
-            <th class="label-banker">莊</th>
-            <td id="hv_b" class="result"></td>
-            <td id="ag_b" class="result"></td>
-            <td id="tp_b" class="result"></td>
-        </tr>
-        <tr>
-            <th class="label-player">閒</th>
-            <td id="hv_p" class="result"></td>
-            <td id="ag_p" class="result"></td>
-            <td id="tp_p" class="result"></td>
-        </tr>
-    </table>
+    <button class="red-btn" onclick="clearInputs()">刪除</button>
+    <button class="green-btn" onclick="transfer()">轉上局</button>
 
     <script>
-        const hvTable = {0:0, 1:2, 2:1, 3:3, 4:2, 5:1, 6:2, 7:3, 8:2, 9:2};
-        const agTable = {0:0, 1:1, 2:2, 3:2, 4:3, 5:4, 6:3, 7:2, 8:1, 9:1};
+        const hvTable = {
+            0: -2, 1: 9, 2: 8, 3: 7, 4: 6, 5: 5,
+            6: 1, 7: 3, 8: 2, 9: 2
+        };
 
-        function getMax(inputs) {
-            return Math.max(...inputs.map(n => isNaN(n) ? 0 : n));
+        const agTable = {
+            0: -4, 1: -5, 2: -5, 3: -2, 4: -1, 5: -1,
+            6: 3, 7: 4, 8: 5, 9: 6
+        };
+
+        function parse(id) {
+            const val = parseInt(document.getElementById(id).value);
+            return isNaN(val) ? 0 : val;
         }
 
-        function getSum(inputs) {
-            const sum = inputs.reduce((a, b) => a + (isNaN(b) ? 0 : b), 0);
+        function getMax(ids) {
+            return Math.max(...ids.map(id => parse(id)));
+        }
+
+        function getSum(ids) {
+            const sum = ids.map(id => parse(id)).reduce((a,b)=>a+b,0);
             if (sum === 10 || sum === 20) return 0;
             if (sum > 20) return sum - 20;
             if (sum > 10) return sum - 10;
@@ -83,186 +112,149 @@
         }
 
         function calculate() {
-            const up_b = [1,2,3].map(i => parseInt(document.getElementById('up_b_' + i).value));
-            const cur_b = [1,2,3].map(i => parseInt(document.getElementById('cur_b_' + i).value));
-            const up_p = [1,2,3].map(i => parseInt(document.getElementById('up_p_' + i).value));
-            const cur_p = [1,2,3].map(i => parseInt(document.getElementById('cur_p_' + i).value));
+            const cur_b = ["cur_b_1", "cur_b_2", "cur_b_3"];
+            const up_b = ["up_b_1", "up_b_2", "up_b_3"];
+            const cur_p = ["cur_p_1", "cur_p_2", "cur_p_3"];
+            const up_p = ["up_p_1", "up_p_2", "up_p_3"];
 
-            const max_b = getMax(cur_b);
-            const max_p = getMax(cur_p);
-            const hv_b = hvTable[max_b] ?? 0;
-            const hv_p = hvTable[max_p] ?? 0;
+            const hv_b = hvTable[getMax(cur_b)] ?? 0;
+            const ag_b = agTable[Math.abs(getSum(cur_b) - getSum(up_b))] ?? 0;
 
-            const sum_b_cur = getSum(cur_b);
-            const sum_b_up  = getSum(up_b);
-            const sum_p_cur = getSum(cur_p);
-            const sum_p_up  = getSum(up_p);
+            const hv_p = hvTable[getMax(cur_p)] ?? 0;
+            const ag_p = agTable[Math.abs(getSum(cur_p) - getSum(up_p))] ?? 0;
 
-            const diff_b = Math.abs(sum_b_cur - sum_b_up);
-            const diff_p = Math.abs(sum_p_cur - sum_p_up);
-
-            const ag_b = agTable[diff_b] ?? 0;
-            const ag_p = agTable[diff_p] ?? 0;
-
-            const tp_b = calcTP(hv_b, ag_b);
-            const tp_p = calcTP(hv_p, ag_p);
-
-            document.getElementById("hv_b").textContent = hv_b;
-            document.getElementById("ag_b").textContent = ag_b;
-            document.getElementById("tp_b").textContent = tp_b;
-            document.getElementById("hv_p").textContent = hv_p;
-            document.getElementById("ag_p").textContent = ag_p;
-            document.getElementById("tp_p").textContent = tp_p;
+            document.getElementById("tp_b").textContent = calcTP(hv_b, ag_b);
+            document.getElementById("tp_p").textContent = calcTP(hv_p, ag_p);
         }
 
-        function transfer() {
-            [1,2,3].forEach(i => {
-                document.getElementById('up_b_' + i).value = document.getElementById('cur_b_' + i).value;
-                document.getElementById('up_p_' + i).value = document.getElementById('cur_p_' + i).value;
+        
+function transfer() {
+    const cur_b_vals = ["1", "2", "3"].map(i => document.getElementById("cur_b_" + i).value || "0");
+    const cur_p_vals = ["1", "2", "3"].map(i => document.getElementById("cur_p_" + i).value || "0");
+
+    const b_sum = cur_b_vals.map(Number).reduce((a,b)=>a+b,0);
+    const p_sum = cur_p_vals.map(Number).reduce((a,b)=>a+b,0);
+
+    let resultText = "";
+    if (b_sum > p_sum) {
+        resultText = "莊勝";
+    } else if (b_sum < p_sum) {
+        resultText = "閒勝";
+    } else {
+        resultText = "合";
+    }
+
+    const display = `莊：${cur_b_vals.join(" ")}，閒：${cur_p_vals.join(" ")} → ${resultText}`;
+    
+    const historyDiv = document.getElementById("last_result");
+    const newEntry = document.createElement("div");
+    
+    const resultSpan = document.createElement("span");
+    resultSpan.textContent = display;
+    if (resultText.includes("莊")) resultSpan.style.color = "red";
+    if (resultText.includes("閒")) resultSpan.style.color = "blue";
+    if (resultText.includes("合")) resultSpan.style.color = "green";
+    newEntry.appendChild(resultSpan);
+
+    historyDiv.prepend(newEntry);
+
+
+
+            ["1","2","3"].forEach(i => {
+                document.getElementById("up_b_" + i).value = document.getElementById("cur_b_" + i).value;
+                document.getElementById("up_p_" + i).value = document.getElementById("cur_p_" + i).value;
+                document.getElementById("cur_b_" + i).value = "";
+                document.getElementById("cur_p_" + i).value = "";
             });
-            clearCurrent();
             calculate();
         }
 
-        function clearCurrent() {
-            [1,2,3].forEach(i => {
-                document.getElementById('cur_b_' + i).value = '';
-                document.getElementById('cur_p_' + i).value = '';
-            });
+        function clearInputs() {
+            document.querySelectorAll("input").forEach(input => input.value = "");
             calculate();
         }
 
-        document.querySelectorAll('input').forEach(el => {
-            el.addEventListener('input', calculate);
+        document.querySelectorAll("input").forEach(el => {
+            el.addEventListener("input", calculate);
         });
     
-        function toggleDetails() {
-            const hvCols = document.querySelectorAll('.hv_col');
-            const agCols = document.querySelectorAll('.ag_col');
-            hvCols.forEach(col => {
-                col.style.display = (col.style.display === 'none') ? 'table-cell' : 'none';
-            });
-            agCols.forEach(col => {
-                col.style.display = (col.style.display === 'none') ? 'table-cell' : 'none';
-            });
-        }
-    
-        // 加入輸入驗證：大於 9 的格子標紅
-        function validateInputs() {
-            document.querySelectorAll("input[type='number']").forEach(input => {
-                const val = parseInt(input.value);
-                if (!isNaN(val) && val > 9) {
-                    input.style.backgroundColor = "#ffcccc";
-                } else {
-                    input.style.backgroundColor = "white";
-                }
-            });
-        }
-
-        // 修改所有 input 綁定事件，增加驗證邏輯
-        document.querySelectorAll('input').forEach(el => {
-            el.addEventListener('input', () => {
-                calculate();
-                validateInputs();
-            });
+    // 輸入驗證與重新計算
+    function validateInputs() {
+        document.querySelectorAll("input").forEach(input => {
+            const val = parseInt(input.value);
+            if (!isNaN(val) && val >= 10) {
+                input.style.backgroundColor = "#ffcccc"; // 過高變紅
+            } else {
+                input.style.backgroundColor = "white";
+            }
         });
+    }
 
-        // 初次載入也驗證一次
-        validateInputs();
-    </script>
+    // 綁定事件：每次輸入都觸發計算與驗證
+    document.querySelectorAll("input").forEach(el => {
+        el.addEventListener("input", () => {
+            calculate();
+            validateInputs();
+        });
+    });
+
+    // 初次載入觸發
+    validateInputs();
+    calculate();
+
+    // 自動選取格子內文字
+    document.querySelectorAll("input").forEach(el => {
+        el.addEventListener("focus", function() {
+            this.select();
+        });
+    });
+
+    // 額外顯示最大 TP 值
+    function showMaxTP() {
+        const tp_b = document.getElementById("tp_b").textContent;
+        const tp_p = document.getElementById("tp_p").textContent;
+        let maxText = "-";
+        const num_b = parseFloat(tp_b);
+        const num_p = parseFloat(tp_p);
+
+        if (!isNaN(num_b) && !isNaN(num_p)) {
+            maxText = (Math.abs(num_b) >= Math.abs(num_p)) ? tp_b : tp_p;
+        } else if (!isNaN(num_b)) {
+            maxText = tp_b;
+        } else if (!isNaN(num_p)) {
+            maxText = tp_p;
+        }
+
+        document.getElementById("tp_max").textContent = maxText;
+    }
+
+    // 修改 TP 顯示後，同步比較最大 TP
+    const originalCalcTP = calcTP;
+    calcTP = function(hv, ag) {
+        const result = hv / ag;
+        const formatted = isNaN(result) || !isFinite(result) ? result.toString() : result.toFixed(1);
+        setTimeout(showMaxTP, 10); // 延遲比較
+        return formatted;
+    };
+
+    // 顯示最大 TP 結果區塊
+    const resultDiv = document.querySelector(".result-box");
+    const maxTPElement = document.createElement("p");
+    maxTPElement.innerHTML = '<strong>最大 TP：</strong><span id="tp_max">-</span>';
+    resultDiv.appendChild(maxTPElement);
+</script>
 
 
 
-    <div style="text-align:center; margin-top: 30px;">
-        <button class="btn" onclick="exportCSV()">匯出紀錄 CSV</button>
-        <button class="btn" onclick="clearHistory()">清空紀錄</button>
+    
+    <div style="position: absolute; right: 20px; top: 120px; width: 280px;">
+        <h3>上轉記錄</h3>
+        <div id="last_result" style="font-size: 16px; font-family: monospace;"></div>
     </div>
-    <table border="1" id="historyTable" style="margin-top: 20px; width: 100%;">
-        <thead>
-            <tr>
-                <th colspan="3" class="label-banker">本局莊</th>
-                <th colspan="3" class="label-player">本局閒</th>
-            </tr>
-        </thead>
-        <tbody id="historyBody"></tbody>
-    </table>
-
-    <script>
-        function saveHistory() {
-            const cur_b = [1,2,3].map(i => document.getElementById('cur_b_' + i).value || 0);
-            const cur_p = [1,2,3].map(i => document.getElementById('cur_p_' + i).value || 0);
-            const record = [...cur_b, ...cur_p];
-            let history = JSON.parse(localStorage.getItem("tp_history") || "[]");
-            history.push(record);
-            localStorage.setItem("tp_history", JSON.stringify(history));
-            renderHistory();
-        }
-
-        function renderHistory() {
-            let history = JSON.parse(localStorage.getItem("tp_history") || "[]");
-            let body = document.getElementById("historyBody");
-            body.innerHTML = "";
-            history.forEach(row => {
-                let tr = "<tr>" + row.map(val => `<td>${val}</td>`).join("") + "</tr>";
-                body.innerHTML += tr;
-            });
-        }
-
-        function exportCSV() {
-            let history = JSON.parse(localStorage.getItem("tp_history") || "[]");
-            let csvContent = "本局莊1,本局莊2,本局莊3,本局閒1,本局閒2,本局閒3\n";
-            history.forEach(row => {
-                csvContent += row.join(",") + "\n";
-            });
-            const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", "TP_紀錄.csv");
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function clearHistory() {
-            localStorage.removeItem("tp_history");
-            renderHistory();
-        }
-
-        // 修改 calculate 函數，讓它每次重新輸入都儲存
-        const originalCalculate = calculate;
-        calculate = function() {
-            originalCalculate();
-            saveHistory();
-        };
-
-        renderHistory();
     
-        // 加入輸入驗證：大於 9 的格子標紅
-        function validateInputs() {
-            document.querySelectorAll("input[type='number']").forEach(input => {
-                const val = parseInt(input.value);
-                if (!isNaN(val) && val > 9) {
-                    input.style.backgroundColor = "#ffcccc";
-                } else {
-                    input.style.backgroundColor = "white";
-                }
-            });
-        }
-
-        // 修改所有 input 綁定事件，增加驗證邏輯
-        document.querySelectorAll('input').forEach(el => {
-            el.addEventListener('input', () => {
-                calculate();
-                validateInputs();
-            });
-        });
-
-        // 初次載入也驗證一次
-        validateInputs();
-    </script>
-
-    </body>
-</html>
+        <h3>上轉記錄</h3>
+        <div id="last_result" style="font-size: 16px; font-family: monospace;"></div>
+    </div>
+</body>
 
 </html>
